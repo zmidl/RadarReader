@@ -44,10 +44,10 @@ namespace RadarReader.ViewModels
       private void Client_Received(object sender, NotifyEventArgs e)
       {
          this.Data.AddRange(this.Analysis(e.Message as List<byte[]>));
-         if (++this.threshold >= 2000)
+         if (++this.threshold >= 1000)
          {
             //App.Current.Dispatcher.InvokeAsync(()=>Helper.SaveCSV(this.columnsName, this.Data, $"C:\\Users\\赵敏\\Desktop\\bb", $"aa{DateTime.Now:yyyy_MM_dd_hh_mm}.csv"));
-            Helper.SaveCSV(this.columnsName, this.Data, $"C:\\Users\\赵敏\\Desktop\\{this.Port}", $"aa{DateTime.Now:MM_dd_hh_mm_ss}.csv");
+            Helper.SaveCSV(this.columnsName, this.Data, $"C:\\Users\\赵敏\\Desktop\\{this.Ip}_{this.Port}", $"{DateTime.Now:MM_dd hh_mm}.csv");
             this.threshold = 0;
             this.Data.Clear();
          }

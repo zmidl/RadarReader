@@ -8,7 +8,7 @@
   xmlns:extToolkit="http://schemas.xceed.com/wpf/xaml/toolkit"
   mc:Ignorable="d"
   xmlns:vm="clr-namespace:RadarReader.ViewModels"
-  Title="MainWindow" Height="450" Width="550">
+  Title="{Binding Title}" Height="450" Width="620">
   <Window.DataContext>
     <vm:MainWindowViewmodel/>
   </Window.DataContext>
@@ -30,34 +30,34 @@
       </Style>
     </Grid.Resources>
 
-    <GroupBox Header="无人值守采集" FontSize="18" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,10,0">
+    <GroupBox Header="无人值守采集" Width="330" FontSize="18" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,10,0">
       <Grid>
-        <TextBlock Text="早高峰开始时间：" Margin="10,20,100,0"/>
-        <extToolkit:TimePicker x:Name="TimePicker1" Value="08:00" Margin="0,20,10,0"/>
-
-        <TextBlock Text="早高峰结束时间：" Margin="10,60,100,0"/>
-        <extToolkit:TimePicker x:Name="TimePicker2" Value="10:00" Margin="0,60,10,0"/>
-
-        <TextBlock Text="晚高峰开始时间：" Margin="10,120,100,0"/>
-        <extToolkit:TimePicker x:Name="TimePicker3" Value="17:00" Margin="0,120,10,0"/>
-
-        <TextBlock Text="晚高峰结束时间：" Margin="10,160,100,10"/>
-        <extToolkit:TimePicker x:Name="TimePicker4" Value="19:00" Margin="0,160,10,0"/>
-
-        <Button Content="开启值守" FontSize="16" Width="110" Height="30" Margin="12,210,0,10" VerticalAlignment="Top" HorizontalAlignment="Left"/>
-        <Button Content="停止值守" FontSize="16" Width="110" Height="30" Margin="133,210,0,20" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        <ItemsControl FontSize="18"  Margin="5,10,5,50" ItemsSource="{Binding Config.TimeSlots}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <StackPanel Orientation="Horizontal">
+                <TextBlock Text="开始" Margin="3,0,5,0"/>
+                <extToolkit:TimePicker Value="{Binding Start}" Margin="0,0,20,0"/>
+                <TextBlock Text="结束" Margin="0,0,5,0"/>
+                <extToolkit:TimePicker Value="{Binding End}" Margin="0,0,5,3"/>
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <Button Content="开启值守" Command="{Binding AutoExecute}" CommandParameter="{Binding ElementName=ListBox1,Path=SelectedItems}" FontSize="16" Width="110" Height="30" Margin="10,220,0,10" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        <Button Content="停止值守" Command="{Binding CancelExecute}" FontSize="16" Width="110" Height="30" Margin="130,220,0,10" VerticalAlignment="Top" HorizontalAlignment="Left"/>
       </Grid>
     </GroupBox>
 
-    <GroupBox Header="手动采集" FontSize="18" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,310,10,0">
+    <GroupBox Header="手动采集" FontSize="18" Width="330" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,310,10,0">
       <Grid>
-        <Button x:Name="Button1" Content="开始采集" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="12,20,0,15" FontSize="16"  Width="110" Height="30"  Command="{Binding Start}" CommandParameter="{Binding ElementName=ListBox1,Path=SelectedItems}"/>
-        <Button x:Name="Button2" Content="停止采集" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="133,20,10,15" FontSize="16"  Width="110" Height="30" Command="{Binding Stop}" />
+        <Button x:Name="Button1" Content="开始采集" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="12,20,0,15" FontSize="16"  Width="110" Height="30"  Command="{Binding StartExecute}" CommandParameter="{Binding ElementName=ListBox1,Path=SelectedItems}"/>
+        <Button x:Name="Button2" Content="停止采集" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="133,20,10,15" FontSize="16"  Width="110" Height="30" Command="{Binding StopExecute}" />
 
       </Grid>
     </GroupBox>
-   
-    <ListBox x:Name="ListBox1" FontSize="18" ItemsSource="{Binding Config.Radars}" SelectedItem="{Binding SelectedItems}" SelectionMode="Extended" HorizontalAlignment="Stretch" Margin="15,15,290,15">
+
+    <ListBox x:Name="ListBox1" FontSize="18" ItemsSource="{Binding Config.Radars}" SelectedItem="{Binding SelectedItems}" SelectionMode="Extended" HorizontalAlignment="Stretch" Margin="15,15,350,15">
       <ListBox.ItemTemplate>
         <DataTemplate>
           <StackPanel Orientation="Horizontal">
