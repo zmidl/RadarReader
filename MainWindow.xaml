@@ -8,7 +8,7 @@
   xmlns:extToolkit="http://schemas.xceed.com/wpf/xaml/toolkit"
   mc:Ignorable="d"
   xmlns:vm="clr-namespace:RadarReader.ViewModels"
-  Title="{Binding Title}" Height="450" Width="620">
+  Title="{Binding Title}"  Height="450" Width="620">
   <Window.DataContext>
     <vm:MainWindowViewmodel/>
   </Window.DataContext>

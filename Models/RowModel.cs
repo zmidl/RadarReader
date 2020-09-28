@@ -50,10 +50,10 @@ namespace RadarReader.Models
          this.PointY = ((Convert.ToInt32(yPointBin, 2) - 4096) * 0.128).ToString("0.000");
          this.SpeedX = ((Convert.ToInt32(xSpeedBin, 2) - 1024) * 0.36).ToString("0.00");
          this.SpeedY = ((Convert.ToInt32(ySpeedBin, 2) - 1024) * 0.36).ToString("0.00");
-         Console.WriteLine($"id:{this.ID}--length:{this.Length}--pointX:{this.PointX}--pointY:{this.PointY}--speedX:{this.SpeedX}--speedY:{this.SpeedY}");
+         //Console.WriteLine($"id:{this.ID}--length:{this.Length}--pointX:{this.PointX}--pointY:{this.PointY}--speedX:{this.SpeedX}--speedY:{this.SpeedY}");
       }
 
-      public override string ToString() => $"{this.ID},{this.Length},{this.SpeedY},{this.SpeedX},{this.PointY},{this.PointX}";
+      public override string ToString() => $"{this.ID},{this.Length},{this.SpeedY},{this.SpeedX},{this.PointY},{this.PointX},{DateTime.Now.ToString("hh:mm")}";
 
    }
 }

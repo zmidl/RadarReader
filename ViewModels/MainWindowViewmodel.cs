@@ -9,11 +9,11 @@ namespace RadarReader.ViewModels
 {
    public class MainWindowViewmodel : ViewModel
    {
-      public string Title { get; set; }
+      public string Title { get; set; } = string.Empty;
       private object selectedItems;
       public DateTime current;
 
-      private readonly Timer t;
+      private readonly Timer timer;
 
       private List<DateTime> targets = new List<DateTime>();
 
@@ -24,13 +24,13 @@ namespace RadarReader.ViewModels
       public RelayCommand AutoExecute => new RelayCommand((selectedItems) =>
       {
          this.selectedItems = selectedItems;
-         t.Change(TimeSpan.Zero, TimeSpan.FromMinutes(1));
+         timer.Change(TimeSpan.Zero, TimeSpan.FromMinutes(1));
          if (this.targets?.Count > 0) this.current = this.targets[0];
       });
 
       public RelayCommand CancelExecute => new RelayCommand(() =>
       {
-         t.Change(Timeout.Infinite, Timeout.Infinite);
+         timer.Change(Timeout.Infinite, Timeout.Infinite);
          this.StopExecute.Execute(null);
       });
 
@@ -50,7 +50,7 @@ namespace RadarReader.ViewModels
             this.targets.Add(item.StartDateTime);
             this.targets.Add(item.EndDateTime);
          }
-         t = new Timer(this.DoWork, this.selectedItems, Timeout.InfiniteTimeSpan, TimeSpan.FromMinutes(1));
+         timer = new Timer(this.DoWork, this.selectedItems, Timeout.InfiniteTimeSpan, TimeSpan.FromMinutes(1));
       }
 
       private void Start(object selectedItems)
@@ -72,10 +72,16 @@ namespace RadarReader.ViewModels
 
       private void DoWork(object selectedItems)
       {
-         if (DateTime.Now.ToString("hhmm") == this.current.ToString("hhmm"))
+         var aa = DateTime.Now.ToString("hhmm");
+         var bb = this.current.ToString("hhmm");
+         if (aa == bb)
          {
-            if (this.Switch()) this.Start(selectedItems);
-            else this.StopExecute.Execute(null);
+            App.Current.Dispatcher.Invoke(() =>
+            {
+               if (this.Switch()) this.StopExecute.Execute(null);
+               else this.Start(this.selectedItems);
+              
+            });
          }
 
          //if (DateTime.Now.ToString("hhmm") == this.current.ToString("hhmm"))

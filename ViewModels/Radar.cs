@@ -20,7 +20,7 @@ namespace RadarReader.ViewModels
 
       private int threshold = 0;
 
-      private readonly List<string> columnsName = new List<string> { nameof(RowModel.ID), nameof(RowModel.Length), nameof(RowModel.SpeedY), nameof(RowModel.SpeedX), nameof(RowModel.PointY), nameof(RowModel.PointY) };
+      private readonly List<string> columnsName = new List<string> { nameof(RowModel.ID), nameof(RowModel.Length), nameof(RowModel.SpeedY), nameof(RowModel.SpeedX), nameof(RowModel.PointY), nameof(RowModel.PointY),"Time" };
 
       public event EventHandler<List<string>> Received;
 
@@ -44,10 +44,10 @@ namespace RadarReader.ViewModels
       private void Client_Received(object sender, NotifyEventArgs e)
       {
          this.Data.AddRange(this.Analysis(e.Message as List<byte[]>));
-         if (++this.threshold >= 1000)
+         if (++this.threshold >= 250)
          {
             //App.Current.Dispatcher.InvokeAsync(()=>Helper.SaveCSV(this.columnsName, this.Data, $"C:\\Users\\赵敏\\Desktop\\bb", $"aa{DateTime.Now:yyyy_MM_dd_hh_mm}.csv"));
-            Helper.SaveCSV(this.columnsName, this.Data, $"C:\\Users\\赵敏\\Desktop\\{this.Ip}_{this.Port}", $"{DateTime.Now:MM_dd hh_mm}.csv");
+            Helper.SaveCSV(this.columnsName, this.Data, $"{Environment.CurrentDirectory}\\{this.Ip}_{this.Port}", $"{DateTime.Now:MM_dd hh_mm}.csv");
             this.threshold = 0;
             this.Data.Clear();
          }
