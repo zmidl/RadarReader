@@ -8,21 +8,34 @@ namespace RadarReader.ViewModels
 {
    public class Radar : Notify
    {
+      /// <summary>
+      /// 雷达IP地址
+      /// </summary>
       public string Ip { get; set; }
 
+      /// <summary>
+      /// 雷达端口
+      /// </summary>
       public int Port { get; set; }
 
+      /// <summary>
+      /// 已接收帧
+      /// </summary>
       [JsonIgnore]
       public int ReceivedPockage { get; set; }
 
+      /// <summary>
+      /// 是否连接
+      /// </summary>
       [JsonIgnore]
       public string IsStart { get; private set; } = "未连接";
 
+      /// <summary>
+      /// 缓存容量（决定是否保存当前缓存数据并清空）
+      /// </summary>
       private int threshold = 0;
 
       private readonly List<string> columnsName = new List<string> { nameof(RowModel.ID), nameof(RowModel.Length), nameof(RowModel.SpeedY), nameof(RowModel.SpeedX), nameof(RowModel.PointY), nameof(RowModel.PointY),"Time" };
-
-      public event EventHandler<List<string>> Received;
 
       [JsonIgnore]
       public List<string> Data { get; set; } = new List<string>();
@@ -31,6 +44,9 @@ namespace RadarReader.ViewModels
 
       public Radar() { }
 
+      /// <summary>
+      /// 初始化雷达对象
+      /// </summary>
       public void Initialize()
       {
          this.client = new SyncTcpClient(new IPEndPoint(IPAddress.Parse(this.Ip), this.Port));
@@ -55,6 +71,11 @@ namespace RadarReader.ViewModels
          }
       }
 
+      /// <summary>
+      /// 数据包解析为多条有效信息
+      /// </summary>
+      /// <param name="source">数据源</param>
+      /// <returns></returns>
       private IEnumerable<string> Analysis(List<byte[]> source)
       {
          foreach (var item in source) yield return new RowModel(item).ToString();

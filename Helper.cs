@@ -1,15 +1,19 @@
 ﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Windows.Documents;
 
 namespace RadarReader
 {
    public class Helper
    {
+      /// <summary>
+      /// Hex集合转字符串信息
+      /// </summary>
+      /// <param name="data"></param>
+      /// <param name="separator"></param>
+      /// <returns></returns>
       public static string PrintHexString(byte[] data, string separator = null)
       {
          var result = new StringBuilder();
@@ -22,8 +26,20 @@ namespace RadarReader
          return result.ToString();
       }
 
+      /// <summary>
+      /// 序列化
+      /// </summary>
+      /// <typeparam name="T"></typeparam>
+      /// <param name="t"></param>
+      /// <returns></returns>
       public static string Serialize<T>(T t) => JsonConvert.SerializeObject(t);
 
+      /// <summary>
+      /// 逆向序列化
+      /// </summary>
+      /// <typeparam name="T"></typeparam>
+      /// <param name="json"></param>
+      /// <returns></returns>
       public static T Deserialize<T>(string json) => JsonConvert.DeserializeObject<T>(json);
 
       /// <summary>
@@ -47,6 +63,11 @@ namespace RadarReader
          }
       }
 
+      /// <summary>
+      /// json字符串转实体对象
+      /// </summary>
+      /// <typeparam name="T"></typeparam>
+      /// <returns></returns>
       public static T Readjson<T>()
       {
          string fileName = $"{Environment.CurrentDirectory}\\Config.json";
