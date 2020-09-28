@@ -16,7 +16,7 @@ namespace RadarReader.ViewModels
       public int ReceivedPockage { get; set; }
 
       [JsonIgnore]
-      public bool IsStart { get; private set; }
+      public string IsStart { get; private set; } = "未连接";
 
       private int threshold = 0;
 
@@ -29,11 +29,7 @@ namespace RadarReader.ViewModels
 
       private SyncTcpClient client;
 
-      public Radar()
-      {
-         //this.client = new SyncTcpClient(new IPEndPoint(IPAddress.Parse(ipAddress), port));
-         //this.client.Received += Client_Received;
-      }
+      public Radar() { }
 
       public void Initialize()
       {
@@ -41,12 +37,18 @@ namespace RadarReader.ViewModels
          this.client.Received += Client_Received;
       }
 
+      /// <summary>
+      /// 接收到数据包
+      /// </summary>
+      /// <param name="sender"></param>
+      /// <param name="e"></param>
       private void Client_Received(object sender, NotifyEventArgs e)
       {
+         this.ReceivedPockage++;
+         this.RaiseProperty(nameof(this.ReceivedPockage));
          this.Data.AddRange(this.Analysis(e.Message as List<byte[]>));
-         if (++this.threshold >= 250)
+         if (++this.threshold >= 300)
          {
-            //App.Current.Dispatcher.InvokeAsync(()=>Helper.SaveCSV(this.columnsName, this.Data, $"C:\\Users\\赵敏\\Desktop\\bb", $"aa{DateTime.Now:yyyy_MM_dd_hh_mm}.csv"));
             Helper.SaveCSV(this.columnsName, this.Data, $"{Environment.CurrentDirectory}\\{this.Ip}_{this.Port}", $"{DateTime.Now:MM_dd hh_mm}.csv");
             this.threshold = 0;
             this.Data.Clear();
@@ -58,18 +60,30 @@ namespace RadarReader.ViewModels
          foreach (var item in source) yield return new RowModel(item).ToString();
       }
 
+      /// <summary>
+      /// 开启雷达数据采集
+      /// </summary>
       public void On()
       {
          this.client.Connect();
-         this.IsStart = true;
+         this.IsStart = "已连接";
+         this.RaiseProperty(nameof(this.IsStart));
       }
 
+      /// <summary>
+      /// 关闭雷达数据采集
+      /// </summary>
       public void Off()
       {
          this.client.Disconnect();
-         this.IsStart = false;
+         this.IsStart = "已断开";
+         this.RaiseProperty(nameof(this.IsStart));
       }
 
+      /// <summary>
+      /// 发送
+      /// </summary>
+      /// <param name="data"></param>
       public void Send(byte[] data = null)
       {
          if (data == null) data = new byte[] { 0xFF };

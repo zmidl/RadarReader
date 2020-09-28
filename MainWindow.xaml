@@ -8,7 +8,7 @@
   xmlns:extToolkit="http://schemas.xceed.com/wpf/xaml/toolkit"
   mc:Ignorable="d"
   xmlns:vm="clr-namespace:RadarReader.ViewModels"
-  Title="{Binding Title}"  Height="450" Width="620">
+  Title="{Binding Title}"  Height="450" Width="750">
   <Window.DataContext>
     <vm:MainWindowViewmodel/>
   </Window.DataContext>
@@ -57,13 +57,15 @@
       </Grid>
     </GroupBox>
 
-    <ListBox x:Name="ListBox1" FontSize="18" ItemsSource="{Binding Config.Radars}" SelectedItem="{Binding SelectedItems}" SelectionMode="Extended" HorizontalAlignment="Stretch" Margin="15,15,350,15">
+    <TextBlock Text="IP                         端口      状态    帧" FontSize="20" HorizontalAlignment="Left" Margin="15,6,0,0"/>
+    <ListBox x:Name="ListBox1" FontSize="18" ItemsSource="{Binding Config.Radars}" SelectionMode="Extended" HorizontalAlignment="Stretch" Margin="15,35,350,15">
       <ListBox.ItemTemplate>
         <DataTemplate>
           <StackPanel Orientation="Horizontal">
-            <TextBlock Text="{Binding Ip}" Margin="0,0,10,0"/>
-            <TextBlock Text="{Binding Port}" Margin="0,0,10,0"/>
-            <TextBlock Text="{Binding ReceivedPackage}" Margin="0,0,10,0"/>
+            <TextBlock Text="{Binding Ip}" Width="150" Margin="0,0,10,0"/>
+            <TextBlock Text="{Binding Port}" Width="60" Margin="0,0,10,0"/>
+            <TextBlock Text="{Binding IsStart}" Width="60" Margin="0,0,10,0"/>
+            <TextBlock Text="{Binding ReceivedPockage}" Margin="0,0,10,0"/>
           </StackPanel>
         </DataTemplate>
       </ListBox.ItemTemplate>
