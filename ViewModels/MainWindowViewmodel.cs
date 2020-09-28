@@ -1,9 +1,7 @@
 ﻿using RadarReader.Models;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Windows;
 
 namespace RadarReader.ViewModels
 {
@@ -13,6 +11,34 @@ namespace RadarReader.ViewModels
       private object selectedItems;
 
       private bool isWorking;
+
+      private bool isUnattended = false;
+      /// <summary>
+      /// 自动采集标帜
+      /// </summary>
+      public bool IsUnattended 
+      {
+         get => this.isUnattended;
+         set
+         {
+            this.isUnattended = value;
+            this.RaiseProperty(nameof(IsUnattended));
+         }
+      }
+
+      private bool isManual;
+      /// <summary>
+      /// 手动采集标帜
+      /// </summary>
+      public bool IsManual
+      {
+         get => this.isManual;
+         set
+         {
+            this.isManual = value;
+            this.RaiseProperty(nameof(this.IsManual));
+         }
+      }
 
       /// <summary>
       /// 下一个自动采集时间
@@ -39,6 +65,7 @@ namespace RadarReader.ViewModels
          this.selectedItems = selectedItems;
          this.CalcTimeSlot();
          this.isWorking = false;
+         this.IsUnattended = true;
          timer.Change(TimeSpan.Zero, TimeSpan.FromMinutes(1));
       });
 
@@ -47,6 +74,7 @@ namespace RadarReader.ViewModels
       /// </summary>
       public RelayCommand CancelExecute => new RelayCommand(() =>
       {
+         this.IsUnattended = false;
          timer.Change(Timeout.Infinite, Timeout.Infinite);
          this.StopExecute.Execute(null);
       });
@@ -54,13 +82,18 @@ namespace RadarReader.ViewModels
       /// <summary>
       /// 手动采集
       /// </summary>
-      public RelayCommand StartExecute => new RelayCommand((selectedItems) => this.Start(selectedItems));
+      public RelayCommand StartExecute => new RelayCommand((selectedItems) =>
+      {
+         this.IsManual = true;
+         this.Start(selectedItems);
+      });
 
       /// <summary>
       /// 手动停止
       /// </summary>
       public RelayCommand StopExecute => new RelayCommand(() =>
       {
+         this.IsManual = false;
          this.Config.Radars.Where(o => o.IsStart == "已连接").ToList().ForEach(o => o.Off());
       });
 
