@@ -23,7 +23,6 @@ namespace RadarReader.ViewModels
       private readonly List<byte> processingCache = new List<byte>();
       private readonly List<byte[]> outputData = new List<byte[]>();
       private int processingStep = 0;
-      private int Tag;
       private TcpClient tcpClient;
 
       private BinaryReader binaryReader;
@@ -33,7 +32,7 @@ namespace RadarReader.ViewModels
       private readonly IPEndPoint serverIpEndPoint;
 
       private bool isInvokeDisconnection;
-
+      private Timer sendTimer;
       private bool isTaskCancel;
 
       private readonly int receivingLength;
@@ -58,8 +57,6 @@ namespace RadarReader.ViewModels
 
       public SyncTcpClient(IPEndPoint ipEndPoint, int receivingLength = 1024, bool isAutoReconnect = true, int survivalDegree = 10)
       {
-
-
          this.tcpClient = new TcpClient();
 
          this.tcpClient.Client.DontFragment = true;
@@ -71,6 +68,8 @@ namespace RadarReader.ViewModels
          this.isAutoReconnect = isAutoReconnect;
 
          this.survivalDegree = survivalDegree;
+
+         this.sendTimer = new Timer((o)=>  this.Send(new byte[] { 0xFF}), this, Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
       }
 
       public void Connect()
@@ -104,7 +103,8 @@ namespace RadarReader.ViewModels
                Thread ReceiveBytesThread = new Thread(new ThreadStart(this.Receive)) { IsBackground = true };
                ReceiveBytesThread.Start();
                this.Connected?.Invoke(this, null);
-               this.Send(new byte[] { 0xFF });
+               this.sendTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(50));
+               //this.Send(new byte[] { 0xFF });
             }
             else { }
          }
@@ -190,7 +190,11 @@ namespace RadarReader.ViewModels
                   {
                      if (readBytes.Length == 3)
                      {
-                        if (readBytes[0] == 0x05 || readBytes[0] == 0x06) this.processingLength =8;
+                        if (readBytes[0] == 0x05 || readBytes[0] == 0x06)
+                        {
+                           this.processingLength = 8;
+                           this.isData = readBytes[0] == 0x05;
+                        }
                         else
                         {
                            if (Enumerable.SequenceEqual(readBytes, this.tail.Take(3)))
@@ -203,7 +207,7 @@ namespace RadarReader.ViewModels
                      else
                      {
                         this.processingLength = 3;
-                        this.outputData.Add(readBytes);
+                        if(this.isData)this.outputData.Add(readBytes);
                      }
                   }
                   else
@@ -247,59 +251,6 @@ namespace RadarReader.ViewModels
          }
          finally { }
       }
-
-      //private void Receive2()
-      //{
-      //   try
-      //   {
-      //      while (this.isInvokeDisconnection == false)
-      //      {
-      //         byte[] readBytes = this.binaryReader.ReadBytes(5000);
-      //         if (readBytes.Length == 0)
-      //         {
-      //            this.OnDisconnect("传感器设置断开连接");
-      //            this.isInvokeDisconnection = true;
-      //         }
-      //         else
-      //         {
-      //            this.OnReceived(readBytes);
-      //            this.isInvokeDisconnection = true;
-      //         }
-      //      }
-      //      this.binaryReader?.Close();
-      //      this.binaryWriter?.Close();
-      //      this.tcpClient?.Close();
-      //   }
-      //   catch (Exception exception)
-      //   {
-      //      this.isInvokeDisconnection = true;
-      //      switch (exception)
-      //      {
-      //         case var type when type is IOException:
-      //            {
-      //               this.OnDisconnect(exception.Message);
-      //               break;
-      //            }
-      //         case var type when type is ArgumentException:
-      //            {
-      //               this.OnDisconnect(exception.Message);
-      //               break;
-      //            }
-      //         case var type when type is ArgumentOutOfRangeException:
-      //            {
-      //               this.OnDisconnect(exception.Message);
-      //               break;
-      //            }
-      //         case var type when type is ObjectDisposedException:
-      //            {
-      //               this.OnDisconnect(exception.Message);
-      //               break;
-      //            }
-      //         default: { this.OnError(exception.Message); break; }
-      //      }
-      //   }
-      //   finally { }
-      //}
 
       public void Send(byte[] byteArray)
       {

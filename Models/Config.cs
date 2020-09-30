@@ -9,5 +9,7 @@ namespace RadarReader.Models
       public List<Radar> Radars { get; set; }
 
       public List<TimeSlot> TimeSlots { get; set; }
+
+      public int Threshold { get; set; }
    }
 }

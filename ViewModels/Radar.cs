@@ -35,7 +35,7 @@ namespace RadarReader.ViewModels
       /// </summary>
       private int threshold = 0;
 
-      private readonly List<string> columnsName = new List<string> { nameof(RowModel.ID), nameof(RowModel.Length), nameof(RowModel.SpeedY), nameof(RowModel.SpeedX), nameof(RowModel.PointY), nameof(RowModel.PointY),"Time" };
+      private readonly List<string> columnsName = new List<string> { nameof(RowModel.ID), nameof(RowModel.Length), nameof(RowModel.SpeedY), nameof(RowModel.SpeedX), nameof(RowModel.PointY), nameof(RowModel.PointY), "Time" };
 
       [JsonIgnore]
       public List<string> Data { get; set; } = new List<string>();
@@ -47,10 +47,16 @@ namespace RadarReader.ViewModels
       /// <summary>
       /// 初始化雷达对象
       /// </summary>
-      public void Initialize()
+      public void Initialize(int threshold)
       {
+         this.threshold = threshold;
          this.client = new SyncTcpClient(new IPEndPoint(IPAddress.Parse(this.Ip), this.Port));
          this.client.Received += Client_Received;
+         this.client.Connected += (s, e) =>
+         {
+            this.IsStart = "已连接";
+            this.RaiseProperty(nameof(this.IsStart));
+         };
       }
 
       /// <summary>
@@ -63,9 +69,9 @@ namespace RadarReader.ViewModels
          this.ReceivedPockage++;
          this.RaiseProperty(nameof(this.ReceivedPockage));
          this.Data.AddRange(this.Analysis(e.Message as List<byte[]>));
-         if (++this.threshold >= 300)
+         if (ReceivedPockage%this.threshold ==0)
          {
-            Helper.SaveCSV(this.columnsName, this.Data, $"{Environment.CurrentDirectory}\\{this.Ip}_{this.Port}", $"{DateTime.Now:MM_dd hh_mm}.csv");
+            Helper.SaveCSV(this.columnsName, this.Data, $"{Environment.CurrentDirectory}\\{this.Ip}_{this.Port}", $"{DateTime.Now:MM_dd hh_mm_ss}.csv");
             this.threshold = 0;
             this.Data.Clear();
          }
@@ -78,18 +84,19 @@ namespace RadarReader.ViewModels
       /// <returns></returns>
       private IEnumerable<string> Analysis(List<byte[]> source)
       {
-         foreach (var item in source) yield return new RowModel(item).ToString();
+         if (source.Count == 0) yield return $"/,/,/,/,/,/,{DateTime.Now:HH:mm}";
+         else
+         {
+            foreach (var item in source) yield return new RowModel(item).ToString();
+         }
       }
 
       /// <summary>
       /// 开启雷达数据采集
       /// </summary>
-      public void On()
-      {
-         this.client.Connect();
-         this.IsStart = "已连接";
-         this.RaiseProperty(nameof(this.IsStart));
-      }
+      public void On() => this.client.Connect();
+
+
 
       /// <summary>
       /// 关闭雷达数据采集

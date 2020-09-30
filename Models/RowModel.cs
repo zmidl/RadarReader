@@ -53,7 +53,7 @@ namespace RadarReader.Models
          //Console.WriteLine($"id:{this.ID}--length:{this.Length}--pointX:{this.PointX}--pointY:{this.PointY}--speedX:{this.SpeedX}--speedY:{this.SpeedY}");
       }
 
-      public override string ToString() => $"{this.ID},{this.Length},{this.SpeedY},{this.SpeedX},{this.PointY},{this.PointX},{DateTime.Now.ToString("hh:mm")}";
+      public override string ToString() => $"{this.ID},{this.Length},{this.SpeedY},{this.SpeedX},{this.PointY},{this.PointX},{DateTime.Now:HH:mm}";
 
    }
 }

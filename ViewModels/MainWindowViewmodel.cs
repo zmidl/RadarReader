@@ -9,15 +9,17 @@ namespace RadarReader.ViewModels
    public class MainWindowViewmodel : ViewModel
    {
       public string Title { get; set; } = string.Empty;
+
       private object selectedItems;
 
-      private bool isWorking;
+      private bool isUnattendedRunning;
 
       private bool isUnattended = false;
+
       /// <summary>
       /// 自动采集标帜
       /// </summary>
-      public bool IsUnattended 
+      public bool IsUnattended
       {
          get => this.isUnattended;
          set
@@ -50,7 +52,7 @@ namespace RadarReader.ViewModels
       /// 时段计时器
       /// </summary>
       private readonly Timer timer;
-      private Timer sendTimer;
+
       ///// <summary>
       ///// 所有自动采集的时间集合
       ///// </summary>
@@ -58,24 +60,20 @@ namespace RadarReader.ViewModels
 
       public Config Config { get; set; } = new Config();
 
-      public RelayCommand ManualExecute => new RelayCommand((selectedItems) =>
-      {
-         this.sendTimer = new Timer((o) =>
-         {
-            this.M(selectedItems);
-         }, this.selectedItems, TimeSpan.Zero, TimeSpan.FromMilliseconds(50));
-      });
-
       /// <summary>
       /// 自动采集
       /// </summary>
       public RelayCommand AutoExecute => new RelayCommand((selectedItems) =>
       {
-         this.selectedItems = selectedItems;
-         this.CalcTimeSlot();
-         this.isWorking = false;
-         this.IsUnattended = true;
-         timer.Change(TimeSpan.Zero, TimeSpan.FromMinutes(1));
+         if (((System.Collections.IList)selectedItems).Cast<Radar>().Count() > 0)
+         {
+            this.selectedItems = selectedItems;
+            this.CalcTimeSlot();
+            this.isUnattendedRunning = false;
+            this.IsUnattended = true;
+            timer.Change(TimeSpan.Zero, TimeSpan.FromMinutes(1));
+         }
+         else MessageBox.Show("至少选择1个雷达");
       });
 
       /// <summary>
@@ -83,7 +81,6 @@ namespace RadarReader.ViewModels
       /// </summary>
       public RelayCommand CancelExecute => new RelayCommand(() =>
       {
-         MessageBox.Show("guale");
          this.IsUnattended = false;
          timer.Change(Timeout.Infinite, Timeout.Infinite);
          this.StopExecute.Execute(null);
@@ -94,9 +91,14 @@ namespace RadarReader.ViewModels
       /// </summary>
       public RelayCommand StartExecute => new RelayCommand((selectedItems) =>
       {
-         this.IsManual = true;
-         this.Start(selectedItems);
+         if (((System.Collections.IList)selectedItems).Cast<Radar>().Count() > 0)
+         {
+            this.IsManual = true;
+            this.Start(selectedItems);
+         }
+         else MessageBox.Show("至少选择1个雷达");
       });
+
 
       /// <summary>
       /// 手动停止
@@ -149,23 +151,9 @@ namespace RadarReader.ViewModels
       {
          foreach (var item in ((System.Collections.IList)selectedItems).Cast<Radar>())
          {
-            item.Initialize();
+            item.Initialize(this.Config.Threshold);
             item.On();
          }
-      }
-      private int aa = 0;
-      private void M(object selectedItems)
-      {
-         this.aa++;
-         //foreach (var item in ((System.Collections.IList)selectedItems).Cast<Radar>())
-         //{
-         //   item.Send(new byte[] { 0xFf });
-         //}
-         App.Current.Dispatcher.Invoke(()=>
-         {
-            this.Title = aa.ToString();
-            this.RaiseProperty(nameof(this.Title));
-         });
       }
 
       /// <summary>
@@ -176,11 +164,11 @@ namespace RadarReader.ViewModels
       {
          var now = Convert.ToInt32(DateTime.Now.ToString("hhmm"));
 
-         if (this.isWorking == false)
+         if (this.isUnattendedRunning == false)
          {
             if (now == this.nextTimeSlot.StartNo)
             {
-               this.isWorking = true;
+               this.isUnattendedRunning = true;
                App.Current.Dispatcher.Invoke(() => this.Start(this.selectedItems));
             }
          }
@@ -188,39 +176,11 @@ namespace RadarReader.ViewModels
          {
             if (now == this.nextTimeSlot.EndNo)
             {
-               this.isWorking = false;
+               this.isUnattendedRunning = false;
                App.Current.Dispatcher.Invoke(() => this.StopExecute.Execute(null));
                this.PushTimeSlot();
             }
          }
-
-         //var now = Convert.ToInt32(DateTime.Now.ToString("hhmm"));
-
-         //if (this.isWorking == false)
-         //{
-         //   if (now == this.nextTimeSlot.StartNo)
-         //   {
-         //      this.isWorking = true;
-         //      App.Current.Dispatcher.Invoke(() =>
-         //      {
-         //         this.Title += $"开始:{now}";
-         //         this.RaiseProperty(nameof(this.Title));
-         //      });
-         //   }
-         //}
-         //else
-         //{
-         //   if (now == this.nextTimeSlot.EndNo)
-         //   {
-         //      this.isWorking = false;
-         //      App.Current.Dispatcher.Invoke(() =>
-         //      {
-         //         this.Title += $"结束:{now}";
-         //         this.RaiseProperty(nameof(this.Title));
-         //      });
-         //      this.PushTimeSlot();
-         //   }
-         //}
       }
    }
 }
