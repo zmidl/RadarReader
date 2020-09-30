@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using System.Threading;
+using Xceed.Wpf.Toolkit;
 
 namespace RadarReader.ViewModels
 {
@@ -49,7 +50,7 @@ namespace RadarReader.ViewModels
       /// 时段计时器
       /// </summary>
       private readonly Timer timer;
-
+      private Timer sendTimer;
       ///// <summary>
       ///// 所有自动采集的时间集合
       ///// </summary>
@@ -59,7 +60,7 @@ namespace RadarReader.ViewModels
 
       public RelayCommand ManualExecute => new RelayCommand((selectedItems) =>
       {
-         var timer = new Timer((o) =>
+         this.sendTimer = new Timer((o) =>
          {
             this.M(selectedItems);
          }, this.selectedItems, TimeSpan.Zero, TimeSpan.FromMilliseconds(50));
@@ -82,6 +83,7 @@ namespace RadarReader.ViewModels
       /// </summary>
       public RelayCommand CancelExecute => new RelayCommand(() =>
       {
+         MessageBox.Show("guale");
          this.IsUnattended = false;
          timer.Change(Timeout.Infinite, Timeout.Infinite);
          this.StopExecute.Execute(null);
@@ -151,13 +153,19 @@ namespace RadarReader.ViewModels
             item.On();
          }
       }
-
+      private int aa = 0;
       private void M(object selectedItems)
       {
-         foreach (var item in ((System.Collections.IList)selectedItems).Cast<Radar>())
+         this.aa++;
+         //foreach (var item in ((System.Collections.IList)selectedItems).Cast<Radar>())
+         //{
+         //   item.Send(new byte[] { 0xFf });
+         //}
+         App.Current.Dispatcher.Invoke(()=>
          {
-            item.Send(new byte[] { 0xFf });
-         }
+            this.Title = aa.ToString();
+            this.RaiseProperty(nameof(this.Title));
+         });
       }
 
       /// <summary>
