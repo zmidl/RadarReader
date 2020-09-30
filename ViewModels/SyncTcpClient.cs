@@ -162,7 +162,7 @@ namespace RadarReader.ViewModels
                            {
                               this.processingStep = 1;
                               this.processingCache.Clear();
-                              this.processingLength = 4;
+                              this.processingLength = 3;
                            }
                            else
                            {
@@ -188,31 +188,27 @@ namespace RadarReader.ViewModels
                   }
                   else if (this.processingStep == 1)
                   {
-                     if (readBytes.Length == 4)
+                     if (readBytes.Length == 3)
                      {
-                        if (readBytes[0] == 0x05 || readBytes[0] == 0x06)
-                        {
-                           this.processingLength = readBytes[3];
-                           this.isData = readBytes[0] == 0x05 ? true : false;
-                        }
+                        if (readBytes[0] == 0x05 || readBytes[0] == 0x06) this.processingLength =8;
                         else
                         {
-                           if (Enumerable.SequenceEqual(readBytes, this.tail.Take(4)))
+                           if (Enumerable.SequenceEqual(readBytes, this.tail.Take(3)))
                            {
                               this.processingStep = 2;
-                              this.processingLength = 6;
+                              this.processingLength = 7;
                            }
                         }
                      }
                      else
                      {
-                        this.processingLength = 4;
-                        if (this.isData) this.outputData.Add(readBytes);
+                        this.processingLength = 3;
+                        this.outputData.Add(readBytes);
                      }
                   }
                   else
                   {
-                     if (Enumerable.SequenceEqual(readBytes, this.tail.Skip(4))) this.OnReceived(this.outputData);
+                     if (Enumerable.SequenceEqual(readBytes, this.tail.Skip(3))) this.OnReceived(this.outputData);
                      ResetCache();
                   }
                }

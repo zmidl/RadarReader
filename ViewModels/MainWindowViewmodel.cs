@@ -57,6 +57,14 @@ namespace RadarReader.ViewModels
 
       public Config Config { get; set; } = new Config();
 
+      public RelayCommand ManualExecute => new RelayCommand((selectedItems) =>
+      {
+         var timer = new Timer((o) =>
+         {
+            this.M(selectedItems);
+         }, this.selectedItems, TimeSpan.Zero, TimeSpan.FromMilliseconds(50));
+      });
+
       /// <summary>
       /// 自动采集
       /// </summary>
@@ -141,6 +149,14 @@ namespace RadarReader.ViewModels
          {
             item.Initialize();
             item.On();
+         }
+      }
+
+      private void M(object selectedItems)
+      {
+         foreach (var item in ((System.Collections.IList)selectedItems).Cast<Radar>())
+         {
+            item.Send(new byte[] { 0xFf });
          }
       }
 
