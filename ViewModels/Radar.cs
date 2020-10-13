@@ -69,10 +69,9 @@ namespace RadarReader.ViewModels
          this.ReceivedPockage++;
          this.RaiseProperty(nameof(this.ReceivedPockage));
          this.Data.AddRange(this.Analysis(e.Message as List<byte[]>));
-         if (ReceivedPockage%this.threshold ==0)
+         if (ReceivedPockage % this.threshold == 0)
          {
             Helper.SaveCSV(this.columnsName, this.Data, $"{Environment.CurrentDirectory}\\{this.Ip}_{this.Port}", $"{DateTime.Now:MM_dd hh_mm_ss}.csv");
-            this.threshold = 0;
             this.Data.Clear();
          }
       }
@@ -84,7 +83,7 @@ namespace RadarReader.ViewModels
       /// <returns></returns>
       private IEnumerable<string> Analysis(List<byte[]> source)
       {
-         if (source.Count == 0) yield return $"/,/,/,/,/,/,{DateTime.Now:HH:mm}";
+         if (source.Count == 0) yield return $"/,/,/,/,/,/,{DateTime.Now:HH:mm:ss:fff}";
          else
          {
             foreach (var item in source) yield return new RowModel(item).ToString();
@@ -118,5 +117,4 @@ namespace RadarReader.ViewModels
          this.client.Send(data);
       }
    }
-
 }
